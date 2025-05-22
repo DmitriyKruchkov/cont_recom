@@ -1,2 +1,6 @@
 ml_topics/ml_venv
 ml_topics/__pycache__/
+tg_preparator/venv
+tg_preparator/__pycache__/
+web/web_venv
+web/__pycache__/

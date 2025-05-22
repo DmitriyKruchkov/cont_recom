@@ -1,7 +1,8 @@
 from ollama import Client
 from topics import TOPICS
+import os
 
-client = Client(host='http://192.168.1.4:11434')
+client = Client(host=os.getenv("OLLAMA_HOST"))
 
 
 def get_topics(text: str) -> list[str]:

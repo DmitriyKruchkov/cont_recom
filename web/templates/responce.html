@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONT_RECOM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #fdfdfd;
+            color: #1a1a1a;
+        }
+        header {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: flex-start;
+            padding: 2rem;
+            gap: 2rem;
+        }
+        .channel-info {
+            flex: 1;
+            max-width: 400px;
+        }
+        .channel-info h2 {
+            margin-bottom: 1rem;
+        }
+        .channel-info img {
+            width: 100%;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .channel-info .link {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .bar-chart {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .bar {
+            width: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .bar div {
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-weight: 700;
+            padding: 0.5rem 0;
+        }
+        .bar1 { height: 40px; background: #4CAF50; }
+        .bar2 { height: 160px; background: #F44336; }
+        .bar3 { height: 100px; background: #9C27B0; }
+        .bar4 { height: 100px; background: #FF9800; }
+        .favourites {
+            margin-top: 2rem;
+            text-align: left;
+        }
+        .favourites h3 {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header>CONT_RECOM</header>
+    <div class="container">
+        <div class="channel-info">
+            <h2>Telegram_channel_name</h2>
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" alt="Channel image">
+            <div class="link">
+                <span>★</span>
+                <span>@ link</span>
+            </div>
+        </div>
+        <div class="bar-chart">
+            <div class="bars">
+                {% for bar in chart_data %}
+                <div class="bar">
+                    <div style="height: {{ bar.height }}px; background: {{ bar.color }}; width: 60px; text-align: center; color: white; font-weight: 700; padding: 0.5rem 0;">
+                    {{ bar.value }}
+                    </div>
+                    <span>{{ bar.label }}</span>
+                </div>
+                {% endfor %}
+                </div>
+            <div class="favourites">
+                <h3>Favourite topics:</h3>
+                <ol>
+                    {% for bar in chart_data %}       
+                        <li>{{ bar.topic_name }}</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
