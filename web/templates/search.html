@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 70vh; gap: 1rem;">
+  <h1 style="font-weight: 700; color: #1a1a1a;">Telegram Analytic Service</h1>
+  <form action="/search" method="post" style="width: 100%; max-width: 500px; display: flex; gap: 0.5rem;">
+    <input 
+      type="text" 
+      name="query" 
+      placeholder="Enter @channel"
+      pattern="^@[A-Za-z0-9_]{5,}$" 
+      style="flex-grow: 1; padding: 0.75rem 1rem; font-size: 1.2rem; border: 1px solid #ccc; border-radius: 6px;"
+      required
+    >
+    <button type="submit" style="
+      background-color: #1a1a1a; 
+      color: white; 
+      border: none; 
+      padding: 0 1.5rem; 
+      font-weight: 700; 
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    ">
+      Analyze
+    </button>
+  </form>
+</div>
+{% endblock %}

@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONT_RECOM</title>
+    <title>BLUE BALLON AI – Telegram Analytic Service</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
     <style>
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
             background-color: #fdfdfd;
             color: #1a1a1a;
-        }
-        header {
-            background-color: #1a1a1a;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 700;
         }
         .container {
             display: flex;
@@ -85,39 +78,45 @@
         .favourites h3 {
             margin-bottom: 0.5rem;
         }
+        header {
+            background-color: #1a1a1a;
+            color: white;
+            height: 100px; /* фиксированная высота хедера */
+            display: flex;
+            align-items: center;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding-left: 1.5rem;
+        }
+
+        .logo {
+            height: 100%;
+            width: auto;
+            object-fit: cover;
+        }
+
+        .brand {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-left: 1rem;
+        }
+
     </style>
 </head>
 <body>
-    <header>CONT_RECOM</header>
+    <header>
+    <div class="header-container">
+        <img src="/static/logo.png" alt="Logo" class="logo">
+        <span class="brand">BLUE BALLON AI</span>
+    </div>
+    </header>
     <div class="container">
-        <div class="channel-info">
-            <h2>Telegram_channel_name</h2>
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" alt="Channel image">
-            <div class="link">
-                <span>★</span>
-                <span>@ link</span>
-            </div>
-        </div>
-        <div class="bar-chart">
-            <div class="bars">
-                {% for bar in chart_data %}
-                <div class="bar">
-                    <div style="height: {{ bar.height }}px; background: {{ bar.color }}; width: 60px; text-align: center; color: white; font-weight: 700; padding: 0.5rem 0;">
-                    {{ bar.value }}
-                    </div>
-                    <span>{{ bar.label }}</span>
-                </div>
-                {% endfor %}
-                </div>
-            <div class="favourites">
-                <h3>Favourite topics:</h3>
-                <ol>
-                    {% for bar in chart_data %}       
-                        <li>{{ bar.topic_name }}</li>
-                    {% endfor %}
-                </ol>
-            </div>
-        </div>
+        {% block content %}
+        {% endblock %}
     </div>
 </body>
 </html>

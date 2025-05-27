@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="channel-info">
+    <h2>{{ channel_name }}</h2>
+    <img src="{{ image_url }}" alt="Channel image">
+    <div class="link">
+        <span>★</span>
+        <span>{{ link }}</span>
+    </div>
+</div>
+<div class="bar-chart">
+    <div class="bars">
+        {% for bar in chart_data %}
+        <div class="bar">
+            <div style="height: {{ bar.height }}px; background: {{ bar.color }}; width: 60px; text-align: center; color: white; font-weight: 700; padding: 0.5rem 0;">
+                {{ bar.value }}
+            </div>
+            <span>{{ bar.label }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="favourites">
+        <h3>Favourite topics:</h3>
+        <ol>
+            {% for bar in chart_data %}       
+                <li>{{ bar.topic_name }}</li>
+            {% endfor %}
+        </ol>
+    </div>
+</div>
+{% endblock %}

@@ -9,7 +9,7 @@ services:
     ports:
       - "2222:22"
     volumes:
-      - ssh-data:/data/ssh  # 🗄 том для ключей и конфигов
+      - ssh-data:/data/ssh  # том для ключей и конфигов
     networks:
       - backend
     restart: unless-stopped
@@ -44,64 +44,60 @@ services:
       - SESSION_STRING=${SESSION_STRING}
     networks:
       - backend
+
+  kafka:
+    image: apache/kafka:3.9.0
+    container_name: kafka
+    environment:
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_NUM_PARTITIONS: "5"
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+    volumes:
+      - ballon-kafka_data:/var/lib/kafka/data
+    networks:
+      - backend
+  postgres:
+    image: postgres:16  # Официальный образ PostgreSQL
+    container_name: postgres  # Имя контейнера
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "15432:5432"  # Пробрасываем порт 5432 на хост
+    volumes:
+      - ballon-postgres_data:/var/lib/postgresql/data
+      - ./sql_scripts/createdb.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always  # Автоматический перезапуск при сбоях
+    networks:
+      - backend
+  redis:
+    image: redis:7.4.2  # Официальный образ Redis
+    container_name: redis  # Имя контейнера
+    volumes:
+      - ballon-redis_data:/data  # Том для данных Redis
+    restart: always  # Автоматический перезапуск при сбоях
+    networks:
+      - backend
+
 volumes:
   ssh-data:
+  ballon-kafka_data:
+  ballon-redis_data:
+  ballon-postgres_data:
+
 
 networks:
   backend:
     driver: bridge
-  # postgres:
-  #   image: postgres:16  # Официальный образ PostgreSQL
-  #   container_name: my_postgres  # Имя контейнера
-  #   environment:
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     POSTGRES_DB: ${POSTGRES_DB}
-  #   ports:
-  #     - "15432:5432"  # Пробрасываем порт 5432 на хост
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #     - ./sql_scripts/createdb.sql:/docker-entrypoint-initdb.d/init.sql
-  #   restart: always  # Автоматический перезапуск при сбоях
-  #   networks:
-  #     - my_network
-  # redis:
-  #   image: redis:7.4.2  # Официальный образ Redis
-  #   container_name: my_redis  # Имя контейнера
-  #   volumes:
-  #     - redis_data:/data  # Том для данных Redis
-  #   restart: always  # Автоматический перезапуск при сбоях
-  #   networks:
-  #     - my_network
-
-  # kafka:
-  #   image: apache/kafka:3.9.0
-  #   container_name: kafka
-  #   environment:
-  #     KAFKA_NODE_ID: "1"
-  #     KAFKA_PROCESS_ROLES: "broker,controller"
-  #     KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
-  #     KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
-  #     KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
-  #     KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"
-  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
-  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
-  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
-  #     KAFKA_NUM_PARTITIONS: "5"
-  #     KAFKA_LOG_DIRS: "/var/lib/kafka/data"
-  #   volumes:
-  #     - kafka-data:/var/lib/kafka/data
-  #   networks:
-  #     - my_network
-
-# volumes:
-#   postgres_data:  # Том для данных PostgreSQL
-#   redis_data:     # Том для данных Redis
-#   kafka-data:     # Том для данных Kafka
-#   click-data:
-
-# networks:
-#   my_network:
-#     driver: bridge
+  
