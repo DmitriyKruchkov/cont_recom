@@ -12,7 +12,8 @@ CREATE TABLE channels_status (
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     channel_id UUID NOT NULL,
-    message TEXT,
+    reaction INTEGER NOT NULL,
+    message_link TEXT,
     CONSTRAINT fk_channel FOREIGN KEY (channel_id) REFERENCES channels_status(id) ON DELETE CASCADE
 );
 

@@ -16,12 +16,12 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def home(request: Request, query: str = None):
     return templates.TemplateResponse("search.html", {"request": request})
 
-@app.post("/search")
-async def post_form(request: Request, query: str = Form(...), response_class=RedirectResponse):
+@app.post("/search", response_class=RedirectResponse)
+async def post_form(request: Request, query: str = Form(...)):
     body = {
         "query": query
     }
-    send_channel = await httpx.request.post("tg_preparator/add_in_queue", json=body)
+    send_channel = await httpx.post("http://tg_preparator/add_in_queue", json=body)
     if send_channel.status_code == 404:
         raise HTTPException(status_code=404, detail="Item not found")
     channel_uuid = send_channel.json().get("channel_uuid")
