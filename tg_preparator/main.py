@@ -70,7 +70,7 @@ async def send_to_queue(item: Item):
                                     ) 
                                     VALUES (%s, %s, %s, %s)
                                     RETURNING id""", (
-                    channel.username,
+                    channel_username,
                     channel.title,
                     # добавить отправку на S3
                     'https://example.com/image.jpg',
