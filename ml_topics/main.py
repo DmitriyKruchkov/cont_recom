@@ -70,7 +70,7 @@ def main():
 
                 data = {
                     "channel_uuid": data["channel_uuid"],
-                    "post_id": data["channel_uuid"],
+                    "post_id": data["post_id"],
                     "topics": topics_json,
                     "is_last": data["is_last"]
                     }
