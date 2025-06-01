@@ -76,8 +76,7 @@ def main():
                     }
                 producer.produce(
                     topic="ml_responces",
-                    value=json.dumps(data),
-                    callback=delivery_report
+                    value=json.dumps(data)
                 )
                 producer.flush()
 
