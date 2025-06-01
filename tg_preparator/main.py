@@ -103,7 +103,7 @@ async def send_to_queue(item: Item):
                                     RETURNING id""", (
                                     channel_uuid,
                                     counter,
-                                    message.link,
+                                    channel_username,
                                     False
                                     ))
                         post_id = cur.fetchone()[0]
@@ -121,7 +121,7 @@ async def send_to_queue(item: Item):
                         )
                     conn.commit()
                     producer.flush()
-                    
+
                     return {"channel_uuid": channel_uuid}
         else:
             raise HTTPException(status_code=404, detail="Channel not found")
