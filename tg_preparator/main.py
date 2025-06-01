@@ -89,12 +89,12 @@ async def send_to_queue(item: Item):
                     ))
                     # добавить добавление поста в бд и колво реакций на посте
                     # добавить отправку постов на обработку llm для топиков и реализовать через kafka
-                    for i in range(len(history.messages)):
-                        message = history.messages[i]
+                    for message in history.messages:
                         counter = 0
+                        emoji_counter = 0
                         for elem in message.reactions.results:
                             if isinstance(elem.reaction, ReactionEmoji) and elem.reaction.emoticon in emoji_translate.keys():
-                                counter += emoji_translate[elem.reaction.emoticon] * elem.count
+                                emoji_counter += emoji_translate[elem.reaction.emoticon] * elem.count
 
                         cur.execute("""INSERT INTO posts (
                                     channel_id, reaction, message_link, processing_status
@@ -102,7 +102,7 @@ async def send_to_queue(item: Item):
                                     VALUES (%s, %s, %s, %s)
                                     RETURNING id""", (
                                     channel_uuid,
-                                    counter,
+                                    emoji_counter,
                                     channel_username,
                                     False
                                     ))
@@ -111,14 +111,15 @@ async def send_to_queue(item: Item):
                             "channel_uuid": channel_uuid,
                             "post_id": post_id,
                             "text": message.text,
-                            "emoji": counter,
-                            "is_last": i == (len(history.messages) - 1)
+                            "emoji": emoji_counter,
+                            "is_last": counter == len(history.messages)
                             }
                         producer.produce(
                             topic="ml_requests",
                             value=json.dumps(data),
                             callback=delivery_report
                         )
+                        counter += 1
                     conn.commit()
                     producer.flush()
 
