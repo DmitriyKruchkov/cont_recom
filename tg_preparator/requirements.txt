@@ -18,3 +18,4 @@ Telethon==1.40.0
 typing-inspection==0.4.1
 typing_extensions==4.13.2
 uvicorn==0.34.2
+uuid

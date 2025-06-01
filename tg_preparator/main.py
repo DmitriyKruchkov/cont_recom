@@ -14,6 +14,8 @@ import logging
 import json
 from confluent_kafka import Consumer, Producer
 import asyncio
+import uuid
+
 
 
 dsn = {
@@ -127,7 +129,56 @@ async def send_to_queue(item: Item):
                     return {"channel_uuid": channel_uuid}
         else:
             raise HTTPException(status_code=404, detail="Channel not found")
+def is_valid_uuid(value: str) -> bool:
+    try:
+        uuid.UUID(value)
+        return True
+    except ValueError:
+        return False
 
+@app.get("/channel/{channel_uuid}")
+def get_channel_topics(channel_uuid):
+
+    if not is_valid_uuid(channel_uuid):
+        return {"status": False}
+
+    with psycopg2.connect(**dsn) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT processing_status FROM channels_status WHERE id = %s", (channel_uuid,))
+            status = cur.fetchone()
+
+            if not status or not status[0]:
+                return {"status": False}
+            else:
+                cur.execute("""
+                                SELECT 
+                                    cs.channel_name,
+                                    cs.telegram_link,
+                                    pt.topic,
+                                    SUM(p.reaction) AS total_reactions
+                                FROM channels_status cs
+                                JOIN posts p ON cs.id = p.channel_id
+                                JOIN post_topics pt ON p.id = pt.post_id
+                                WHERE cs.id = %s AND cs.processing_status = TRUE
+                                GROUP BY cs.channel_name, cs.telegram_link, pt.topic
+                                ORDER BY total_reactions DESC;
+                """, (channel_uuid,))
+                rows = cur.fetchall()
+
+                channel_name = rows[0][0] if rows else None
+                telegram_link = rows[0][1] if rows else None
+                chart_data = [
+                    {"label": topic, "value": reactions}
+                    for _, _, topic, reactions in rows
+                ]
+                topics = [row[2] for row in rows]
+                return {
+                    "status": True,
+                    "channel_name": channel_name,
+                    "link": telegram_link,
+                    "chart_data": chart_data,
+                    "topics": topics
+                    }
 
 def delivery_report(err, msg):
     if err is not None:

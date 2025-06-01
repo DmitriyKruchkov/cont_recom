@@ -25,7 +25,7 @@ async def post_form(request: Request, query: str = Form(...)):
     if send_channel.status_code == 404:
         raise HTTPException(status_code=404, detail="Item not found")
     channel_uuid = send_channel.json().get("channel_uuid")
-    return RedirectResponse(f"/channel/{channel_uuid}")
+    return RedirectResponse(f"/channel/{channel_uuid}", status_code=302)
 
 @app.exception_handler(404)
 async def handle_404(request: Request, exc):
@@ -34,20 +34,25 @@ async def handle_404(request: Request, exc):
 
 @app.get("/channel/{channel_uuid}", response_class=HTMLResponse)
 async def read_root(channel_uuid, request):
-    chart_data = [
-        {"label": "1", "height": 400, "color": "#4CAF50", "value": 1, "topic_name": "topic_1"},
-        {"label": "2", "height": 160, "color": "#F44336", "value": 2, "topic_name": "topic_2"},
-        {"label": "3", "height": 100, "color": "#9C27B0", "value": 3, "topic_name": "topic_3"},
-        {"label": "4", "height": 100, "color": "#FF9800", "value": 4, "topic_name": "topic_4"},
-    ]
-    topics = ["topic_1", "topic_2", "topic_3"]
-    return templates.TemplateResponse("graph.html", {
-        "request": request,
-        "channel_name": "Telegram_channel_name",
-        "link": "@link",
-        "chart_data": chart_data,
-        "topics": topics
-    })
+    channel = (httpx.get(f"http://tg_preparator:8000/{channel_uuid}")).json()
+
+    if channel.get('status'):
+        chart_data = channel["chart_data"]
+        
+        # Нормализация значений
+        max_val = max(abs(item["value"]) for item in chart_data) or 1
+        for item in chart_data:
+            item["normalized"] = abs(item["value"]) / max_val
+
+        return templates.TemplateResponse("graph.html", {
+            "request": request,
+            "channel_name": channel["channel_name"],
+            "link": channel["link"],
+            "chart_data": chart_data,
+            "topics": channel["topics"],
+        })
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
 
 
 if __name__ == "__main__":
