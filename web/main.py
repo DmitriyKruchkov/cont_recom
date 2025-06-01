@@ -44,6 +44,7 @@ async def read_root(channel_uuid: str, request: Request):
         for item in chart_data:
             item["normalized"] = abs(item["value"]) / max_val
 
+        print(chart_data)
         return templates.TemplateResponse("graph.html", {
             "request": request,
             "channel_name": channel["channel_name"],
