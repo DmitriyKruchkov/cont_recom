@@ -19,7 +19,7 @@ consumer = Consumer({
 })
 consumer.subscribe(['ml_requests'])
 kafka_conf_producer = {'bootstrap.servers': 'kafka:9092'}
-producer = Producer(conf)
+producer = Producer(kafka_conf_producer)
 
 def get_topics(text: str) -> list[str]:
     format_string = '{"topics": ["topic1", ...]}'

@@ -1,6 +1,6 @@
 FROM python:3.10
 
-WORKDIR /ml_topics
+WORKDIR /web
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && useradd -ms /bin/bash user
