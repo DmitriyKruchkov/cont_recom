@@ -21,7 +21,7 @@ async def post_form(request: Request, query: str = Form(...)):
     body = {
         "query": query
     }
-    send_channel = await httpx.post("http://tg_preparator/add_in_queue", json=body)
+    send_channel = await httpx.post("http://tg_preparator:8000/add_in_queue", json=body)
     if send_channel.status_code == 404:
         raise HTTPException(status_code=404, detail="Item not found")
     channel_uuid = send_channel.json().get("channel_uuid")
