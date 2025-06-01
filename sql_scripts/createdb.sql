@@ -14,10 +14,12 @@ CREATE TABLE posts (
     channel_id UUID NOT NULL,
     reaction INTEGER NOT NULL,
     message_link TEXT,
+    processing_status BOOLEAN DEFAULT FALSE,
     CONSTRAINT fk_channel FOREIGN KEY (channel_id) REFERENCES channels_status(id) ON DELETE CASCADE
 );
 
 CREATE TABLE post_topics (
+    id SERIAL PRIMARY KEY,
     post_id INTEGER NOT NULL,
     topic TEXT NOT NULL,
     PRIMARY KEY (post_id, topic),

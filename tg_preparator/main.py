@@ -8,7 +8,30 @@ from fastapi import FastAPI, Request
 import uvicorn
 from pydantic import BaseModel
 from telethon.errors.rpcerrorlist import UsernameInvalidError
+from os import getenv
+import psycopg2
+import logging
+import json
 
+
+
+dsn = {
+    "dbname": getenv("POSTGRES_DB"),
+    "user": getenv("POSTGRES_USER"),
+    "password": getenv("POSTGRES_PASSWORD"),
+    "host": getenv("POSTGRES_HOST", "postgres"),
+    "port": getenv("POSTGRES_PORT", "5432"),
+}
+
+kafka_conf = {'bootstrap.servers': 'kafka:9092'}
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+producer = Producer(conf)
 
 app = FastAPI()
 client = TelegramClient(StringSession(session_string), api_id, api_hash)
@@ -29,27 +52,75 @@ async def send_to_queue(item: Item):
         
         if isinstance(channel, Channel) and channel.megagroup is False:
             # добавить добавление канала в БД и в редис и возврат uuid для дальнейшей обработки
-            history = await client(GetHistoryRequest(
-                peer=channel,
-                limit=10,
-                offset_date=None,
-                offset_id=0,
-                max_id=0,
-                min_id=0,
-                add_offset=0,
-                hash=0
-            ))
-            # добавить добавление поста в бд и колво реакций на посте
-            # добавить отправку постов на обработку llm для топиков и реализовать через kafka
-            for message in history.messages:
-                counter = 0
-                for elem in message.reactions.results:
-                    if isinstance(elem.reaction, ReactionEmoji) and elem.reaction.emoticon in emoji_translate.keys():
-                        counter += emoji_translate[elem.reaction.emoticon] * elem.count
-                print(counter)
+            with psycopg2.connect(**dsn) as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""INSERT INTO channels_status (
+                                    telegram_link, channel_name, picture_link, processing_status
+                                    ) 
+                                    VALUES (%s, %s, %s, %s)
+                                    RETURNING id""", (
+                    channel.username,
+                    channel.title,
+                    # добавить отправку на S3
+                    'https://example.com/image.jpg',
+                    False
+                    ))
+                    channel_uuid = cur.fetchone()[0]
+                    history = await client(GetHistoryRequest(
+                        peer=channel,
+                        limit=10,
+                        offset_date=None,
+                        offset_id=0,
+                        max_id=0,
+                        min_id=0,
+                        add_offset=0,
+                        hash=0
+                    ))
+                    # добавить добавление поста в бд и колво реакций на посте
+                    # добавить отправку постов на обработку llm для топиков и реализовать через kafka
+                    for i in range(len(history.messages)):
+                        message = history.messages[i]
+                        counter = 0
+                        for elem in message.reactions.results:
+                            if isinstance(elem.reaction, ReactionEmoji) and elem.reaction.emoticon in emoji_translate.keys():
+                                counter += emoji_translate[elem.reaction.emoticon] * elem.count
+
+                        cur.execute("""INSERT INTO posts (
+                                    channel_id, reaction, message_link, processing_status
+                                    ) 
+                                    VALUES (%s, %s, %s, %s)
+                                    RETURNING id""", (
+                                    channel_uuid,
+                                    counter,
+                                    message.link,
+                                    False
+                                    ))
+                        post_id = cur.fetchone()[0]
+                        data = {
+                            "channel_uuid": channel_uuid,
+                            "post_id": post_id,
+                            "text": message.text,
+                            "emoji": counter,
+                            "is_last": i == (len(history.messages) - 1)
+                            }
+                        producer.produce(
+                            topic="ml_requests",
+                            value=json.dumps(data),
+                            callback=delivery_report
+                        )
+                    conn.commit()
+                    producer.flush()
         else:
             raise HTTPException(status_code=404, detail="Channel not found")
 
+
+def delivery_report(err, msg):
+    if err is not None:
+        logger.error(f"❌ Delivery failed: {err}")
+    else:
+        logger.info(
+            f"✅ Message delivered to {msg.topic()} [partition {msg.partition()}] at offset {msg.offset()}"
+        )
 
 
 if __name__ == "__main__":
