@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import httpx
+import random
 
 app = FastAPI()
 
@@ -31,6 +32,8 @@ async def post_form(request: Request, query: str = Form(...)):
 async def handle_404(request: Request, exc):
     return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
 
+def random_color():
+    return f"#{random.randint(0, 0xFFFFFF):06x}"
 
 @app.get("/channel/{channel_uuid}", response_class=HTMLResponse)
 async def read_root(channel_uuid: str, request: Request):
@@ -41,16 +44,20 @@ async def read_root(channel_uuid: str, request: Request):
         
         # Нормализация значений
         max_val = max(abs(item["value"]) for item in chart_data) or 1
+        counter = 1
         for item in chart_data:
             item["normalized"] = (abs(item["value"]) / max_val) * 200
+            item["color"] = random_color()
+            item["index"] = counter
+
+            counter += 1            
 
         print(chart_data)
         return templates.TemplateResponse("graph.html", {
             "request": request,
             "channel_name": channel["channel_name"],
             "link": channel["link"],
-            "chart_data": chart_data,
-            "topics": channel["topics"],
+            "chart_data": chart_data
         })
     else:
         raise HTTPException(status_code=404, detail="Item not found")
