@@ -137,7 +137,7 @@ def delivery_report(err, msg):
         )
 
 def consume_kafka():
-    consumer = Consumer(kafka_config)
+    consumer = Consumer(kafka_conf_consumer)
     consumer.subscribe(['ml_responces'])
 
     conn = psycopg2.connect(**dsn)
