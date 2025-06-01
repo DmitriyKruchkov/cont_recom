@@ -12,7 +12,8 @@ from os import getenv
 import psycopg2
 import logging
 import json
-
+from confluent_kafka import Consumer, Producer
+import asyncio
 
 
 dsn = {
@@ -39,6 +40,11 @@ client = TelegramClient(StringSession(session_string), api_id, api_hash)
 class Item(BaseModel):
     query: str
 
+
+@app.on_event("startup")
+def start_kafka_consumer():
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, consume_kafka)
 
 @app.post("/add_in_queue")
 async def send_to_queue(item: Item):
@@ -122,6 +128,43 @@ def delivery_report(err, msg):
             f"✅ Message delivered to {msg.topic()} [partition {msg.partition()}] at offset {msg.offset()}"
         )
 
+def consume_kafka():
+    consumer = Consumer(kafka_config)
+    consumer.subscribe(['ml_responce'])
+
+    conn = psycopg2.connect(**dsn)
+    cur = conn.cursor()
+
+    logger.info("Kafka consumer started")
+
+    try:
+        while True:
+            msg = consumer.poll(1.0)
+            if msg is None or msg.error():
+                continue
+
+            try:
+                data = json.loads(msg.value())
+                post_id = data["post_id"]
+                topics = data["topics"]
+
+                for topic in topics:
+                    cur.execute(
+                        "INSERT INTO post_topics (post_id, topic) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                        (post_id, topic)
+                    )
+                conn.commit()
+
+            except Exception as e:
+                logger.info("Error handling message:", e)
+                conn.rollback()
+
+    except Exception as e:
+        logger.info("Kafka loop error:", e)
+    finally:
+        cur.close()
+        conn.close()
+        consumer.close()
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
