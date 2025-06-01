@@ -14,7 +14,7 @@
         {% for bar in chart_data %}
         <div class="bar">
             <div style="height: {{ bar.height }}px; background: {{ bar.color }}; width: 60px; text-align: center; color: white; font-weight: 700; padding: 0.5rem 0;">
-                {{ bar.value }}
+                {{ bar.normalized }}
             </div>
             <span>{{ bar.label }}</span>
         </div>
@@ -24,7 +24,7 @@
         <h3>Favourite topics:</h3>
         <ol>
             {% for bar in chart_data %}       
-                <li>{{ bar.topic_name }}</li>
+                <li>{{ bar.label }}</li>
             {% endfor %}
         </ol>
     </div>
