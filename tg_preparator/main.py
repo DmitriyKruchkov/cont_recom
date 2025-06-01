@@ -24,7 +24,12 @@ dsn = {
     "port": getenv("POSTGRES_PORT", "5432"),
 }
 
-kafka_conf = {'bootstrap.servers': 'kafka:9092'}
+kafka_conf_producer = {'bootstrap.servers': 'kafka:9092'}
+kafka_conf_consumer = {
+    'bootstrap.servers': 'kafka:9092',
+    'group.id': 'ml_responces_group',
+    'auto.offset.reset': 'earliest'
+}
 
 logging.basicConfig(
     level=logging.INFO,
@@ -122,15 +127,15 @@ async def send_to_queue(item: Item):
 
 def delivery_report(err, msg):
     if err is not None:
-        logger.error(f"❌ Delivery failed: {err}")
+        logger.error(f"Delivery failed: {err}")
     else:
         logger.info(
-            f"✅ Message delivered to {msg.topic()} [partition {msg.partition()}] at offset {msg.offset()}"
+            f"Message delivered to {msg.topic()} [partition {msg.partition()}] at offset {msg.offset()}"
         )
 
 def consume_kafka():
     consumer = Consumer(kafka_config)
-    consumer.subscribe(['ml_responce'])
+    consumer.subscribe(['ml_responces'])
 
     conn = psycopg2.connect(**dsn)
     cur = conn.cursor()
@@ -145,15 +150,27 @@ def consume_kafka():
 
             try:
                 data = json.loads(msg.value())
+                channel_uuid = data["channel_uuid"]
                 post_id = data["post_id"]
                 topics = data["topics"]
+                is_last = data["is_last"]
 
                 for topic in topics:
                     cur.execute(
-                        "INSERT INTO post_topics (post_id, topic) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                        "INSERT INTO post_topics (post_id, topic) VALUES (%s, %s)",
                         (post_id, topic)
                     )
-                conn.commit()
+
+                if is_last:
+                    cur.execute(
+                        "UPDATE channels_status SET processing_status = %s WHERE id = %s",
+                        (True, channel_uuid)
+                    )
+                    cur.execute(
+                        "UPDATE posts SET processing_status = %s WHERE id = %s",
+                        (True, post_id)
+                    )
+                    conn.commit()
 
             except Exception as e:
                 logger.info("Error handling message:", e)

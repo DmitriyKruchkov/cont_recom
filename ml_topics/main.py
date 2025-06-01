@@ -1,9 +1,25 @@
 from ollama import Client
 from topics import TOPICS
 import os
+import logging
+import json
+from confluent_kafka import Consumer, Producer
 
 client = Client(host=os.getenv("OLLAMA_HOST"))
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
 
+consumer = Consumer({
+    'bootstrap.servers': 'kafka:9092',
+    'group.id': 'ml_requests_group',
+    'auto.offset.reset': 'earliest'
+})
+consumer.subscribe(['ml_requests'])
+kafka_conf_producer = {'bootstrap.servers': 'kafka:9092'}
+producer = Producer(conf)
 
 def get_topics(text: str) -> list[str]:
     format_string = '{"topics": ["topic1", ...]}'
@@ -29,14 +45,50 @@ def get_topics(text: str) -> list[str]:
             })
 
     raw = response['message']['content']
-    return raw
+    last_line = raw.strip().splitlines()[-1]
 
-# 🔬 Пример поста из Telegram
-post = """СССР «юридически ведь где-то существует», о чем давно говорят специалисты по конституционному праву, в том числе на Западе, — заявил советник президента России Антон Кобяков
+    return json.loads(last_line)["topics"]
 
-«А почему они так говорят? Они говорят так потому, что была нарушена процедура так называемого роспуска СССР. Если Съезд народных депутатов, он же Съезд Советов в 1922 году создавал СССР, то и распускать нужно было его по решению Съезда этих самых депутатов», – отметил он
 
-По словам Кобякова, «совершенно странным» с правовой точки зрения выглядит подписание Беловежских соглашений 8 декабря 1991 года. «Эти акты позже ратифицировали Верховные советы РСФСР, УССР, БССР, а это вообще не в их компетенции», – добавил советник президента
-"""
-print(get_topics(post))
+def main()
+    try:
+        while True:
+            msg = consumer.poll(timeout=1.0)
+            if msg is None or msg.error():
+                continue
 
+            try:
+                data = json.loads(msg.value())
+                text = data["text"]
+                if not text:
+                    logger.info("No text in message")
+                    continue
+
+                logger.info("Post received. Running LLM topic classification...")
+                topics_json = get_topics(text)
+                logger.info(f"Topics: {topics_json}")
+
+                data = {
+                    "channel_uuid": data["channel_uuid"],
+                    "post_id": data["channel_uuid"],
+                    "topics": topics_json,
+                    "is_last": data["is_last"]
+                    }
+                producer.produce(
+                    topic="ml_responces",
+                    value=json.dumps(data),
+                    callback=delivery_report
+                )
+                producer.flush()
+
+            except Exception as e:
+                logger.info(f"Error processing message: {e}")
+
+    except KeyboardInterrupt:
+        logger.info("Shutting down...")
+
+    finally:
+        consumer.close()
+
+if __name__ == "__main__":
+    main()
