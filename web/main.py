@@ -34,7 +34,7 @@ async def handle_404(request: Request, exc):
 
 @app.get("/channel/{channel_uuid}", response_class=HTMLResponse)
 async def read_root(channel_uuid: str, request: Request):
-    channel = (httpx.get(f"http://tg_preparator:8000/{channel_uuid}")).json()
+    channel = (httpx.get(f"http://tg_preparator:8000/channel/{channel_uuid}")).json()
 
     if channel.get('status'):
         chart_data = channel["chart_data"]
