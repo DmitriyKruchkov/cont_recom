@@ -111,7 +111,7 @@ async def send_to_queue(item: Item):
                         data = {
                             "channel_uuid": channel_uuid,
                             "post_id": post_id,
-                            "text": message.text,
+                            "text": message.message,
                             "emoji": emoji_counter,
                             "is_last": counter == len(history.messages) - 1
                             }
