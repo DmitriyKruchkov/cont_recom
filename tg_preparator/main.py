@@ -79,7 +79,7 @@ async def send_to_queue(item: Item):
                     channel_uuid = cur.fetchone()[0]
                     history = await client(GetHistoryRequest(
                         peer=channel,
-                        limit=10,
+                        limit=1,
                         offset_date=None,
                         offset_id=0,
                         max_id=0,
