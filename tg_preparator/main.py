@@ -37,7 +37,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-producer = Producer(conf)
+producer = Producer(kafka_conf_producer)
 
 app = FastAPI()
 client = TelegramClient(StringSession(session_string), api_id, api_hash)

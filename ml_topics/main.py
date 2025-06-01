@@ -50,7 +50,7 @@ def get_topics(text: str) -> list[str]:
     return json.loads(last_line)["topics"]
 
 
-def main()
+def main():
     try:
         while True:
             msg = consumer.poll(timeout=1.0)
