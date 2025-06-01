@@ -87,6 +87,7 @@ async def send_to_queue(item: Item):
                         add_offset=0,
                         hash=0
                     ))
+                    logger.info(history)
                     # добавить добавление поста в бд и колво реакций на посте
                     # добавить отправку постов на обработку llm для топиков и реализовать через kafka
                     for message in history.messages:
@@ -112,7 +113,7 @@ async def send_to_queue(item: Item):
                             "post_id": post_id,
                             "text": message.text,
                             "emoji": emoji_counter,
-                            "is_last": counter == len(history.messages)
+                            "is_last": counter == len(history.messages) - 1
                             }
                         producer.produce(
                             topic="ml_requests",
