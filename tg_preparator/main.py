@@ -196,7 +196,7 @@ def get_channel_topics(channel_uuid):
                                 JOIN posts p ON cs.id = p.channel_id
                                 JOIN post_topics pt ON p.id = pt.post_id
                                 WHERE cs.id = %s AND cs.processing_status = TRUE
-                                GROUP BY cs.channel_name, cs.telegram_link, pt.topic
+                                GROUP BY cs.channel_name, cs.telegram_link, cs.picture_link, pt.topic
                                 ORDER BY total_reactions DESC;
                 """, (channel_uuid,))
                 rows = cur.fetchall()
