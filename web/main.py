@@ -28,6 +28,9 @@ async def post_form(request: Request, query: str = Form(...)):
     channel_uuid = send_channel.json().get("channel_uuid")
     return RedirectResponse(f"/channel/{channel_uuid}", status_code=302)
 
+
+
+
 @app.exception_handler(404)
 async def handle_404(request: Request, exc):
     return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
@@ -46,7 +49,7 @@ async def read_root(channel_uuid: str, request: Request):
         max_val = max(abs(item["value"]) for item in chart_data) or 1
         counter = 1
         for item in chart_data:
-            item["normalized"] = (abs(item["value"]) / max_val) * 600
+            item["normalized"] = (abs(item["value"]) / max_val) * 400
             item["color"] = random_color()
             item["index"] = counter
 
@@ -61,7 +64,7 @@ async def read_root(channel_uuid: str, request: Request):
             "chart_data": chart_data
         })
     else:
-        raise HTTPException(status_code=404, detail="Item not found")
+        return templates.TemplateResponse("waiting.html", {"request": request})
 
 
 if __name__ == "__main__":

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; text-align: center;">
+    <div style="width: 60px; height: 60px; border: 6px solid #ddd; border-top-color: #1a1a1a; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <h2 style="margin-top: 1rem;">We are analyzing your channel...</h2>
+    <p>This page will reload automatically once ready.</p>
+</div>
+
+<script>
+    setTimeout(function () {
+        window.location.reload();
+    }, 30000); // 5 seconds
+</script>
+
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

@@ -19,6 +19,9 @@ import boto3
 import io
 
 
+
+POSTS_COUNT = 5
+
 dsn = {
     "dbname": getenv("POSTGRES_DB"),
     "user": getenv("POSTGRES_USER"),
@@ -116,7 +119,7 @@ async def send_to_queue(item: Item):
                     channel_uuid = cur.fetchone()[0]
                     history = await client(GetHistoryRequest(
                         peer=channel,
-                        limit=1,
+                        limit=POSTS_COUNT,
                         offset_date=None,
                         offset_id=0,
                         max_id=0,
