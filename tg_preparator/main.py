@@ -16,6 +16,7 @@ from confluent_kafka import Consumer, Producer
 import asyncio
 import uuid
 import boto3
+import io
 
 
 dsn = {
