@@ -133,6 +133,8 @@ async def send_to_queue(item: Item):
                     for message in history.messages:
                         counter = 0
                         emoji_counter = 0
+                        if not message.reactions:
+                            continue
                         for elem in message.reactions.results:
                             if isinstance(elem.reaction, ReactionEmoji) and elem.reaction.emoticon in emoji_translate.keys():
                                 emoji_counter += emoji_translate[elem.reaction.emoticon] * elem.count
