@@ -56,6 +56,7 @@ async def read_root(channel_uuid: str, request: Request):
         return templates.TemplateResponse("graph.html", {
             "request": request,
             "channel_name": channel["channel_name"],
+            "image_url": channel["picture_link"]
             "link": channel["link"],
             "chart_data": chart_data
         })

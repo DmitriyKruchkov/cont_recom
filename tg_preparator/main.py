@@ -189,6 +189,7 @@ def get_channel_topics(channel_uuid):
                                 SELECT 
                                     cs.channel_name,
                                     cs.telegram_link,
+                                    cs.picture_link,
                                     pt.topic,
                                     SUM(p.reaction) AS total_reactions
                                 FROM channels_status cs
@@ -202,15 +203,17 @@ def get_channel_topics(channel_uuid):
 
                 channel_name = rows[0][0] if rows else None
                 telegram_link = rows[0][1] if rows else None
+                picture_link = rows[0][2] if rows else None
                 chart_data = [
                     {"label": topic, "value": reactions}
-                    for _, _, topic, reactions in rows
+                    for _, _, _, topic, reactions in rows
                 ]
                 topics = [row[2] for row in rows]
                 return {
                     "status": True,
                     "channel_name": channel_name,
                     "link": telegram_link,
+                    "picture_link": picture_link,
                     "chart_data": chart_data,
                     "topics": topics
                     }

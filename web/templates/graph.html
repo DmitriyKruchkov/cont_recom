@@ -13,10 +13,9 @@
     <div class="bars">
         {% for bar in chart_data %}
         <div class="bar">
-            <div style="height: {{ bar.height }}px; background: {{ bar.color }}; width: 60px; text-align: center; color: white; font-weight: 700; padding: 0.5rem 0;">
-                {{ bar.normalized }}
+            <div style="height: {{ bar.normalized }}px; background: {{ bar.color }}; width: 60px; text-align: center; color: white; font-weight: 700; padding: 0.5rem 0;">
+                {{ bar.index }}
             </div>
-            <span>{{ bar.index }}</span>
         </div>
         {% endfor %}
     </div>
