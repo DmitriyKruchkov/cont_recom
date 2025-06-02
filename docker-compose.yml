@@ -111,6 +111,7 @@ volumes:
   ballon-kafka_data:
   ballon-redis_data:
   ballon-postgres_data:
+  minio-data:
 
 
 networks:
