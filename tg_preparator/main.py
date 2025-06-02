@@ -43,7 +43,20 @@ s3 = boto3.client(
     aws_secret_access_key='minioadmin',
     region_name='us-east-1'
 )
+policy = {
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Effect": "Allow",
+        "Principal": "*",
+        "Action": ["s3:GetObject"],
+        "Resource": [f"arn:aws:s3:::{BUCKET_NAME}/*"]
+    }]
+}
 
+s3.put_bucket_policy(
+    Bucket=BUCKET_NAME,
+    Policy=json.dumps(policy)
+)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -67,7 +80,7 @@ def start_kafka_consumer():
 def send_to_s3(buffer):
     s3_key = f"avatars/{uuid.uuid4().hex}.jpg"
     s3.upload_fileobj(buffer, BUCKET_NAME, s3_key, ExtraArgs={'ContentType': 'image/jpeg'})
-    return f"http://{MINIO_ENDPOINT}/{s3_key}"
+    return f"http://{MINIO_ENDPOINT}/{BUCKET_NAME}/{s3_key}"
     
 
 @app.post("/add_in_queue")
