@@ -20,7 +20,7 @@ import io
 
 
 
-POSTS_COUNT = 3
+POSTS_COUNT = 1
 
 dsn = {
     "dbname": getenv("POSTGRES_DB"),
