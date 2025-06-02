@@ -46,7 +46,7 @@ async def read_root(channel_uuid: str, request: Request):
         max_val = max(abs(item["value"]) for item in chart_data) or 1
         counter = 1
         for item in chart_data:
-            item["normalized"] = (abs(item["value"]) / max_val) * 200
+            item["normalized"] = (abs(item["value"]) / max_val) * 600
             item["color"] = random_color()
             item["index"] = counter
 

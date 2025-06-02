@@ -15,7 +15,7 @@ import json
 from confluent_kafka import Consumer, Producer
 import asyncio
 import uuid
-
+import boto3
 
 
 dsn = {
@@ -32,6 +32,16 @@ kafka_conf_consumer = {
     'group.id': 'ml_responces_group',
     'auto.offset.reset': 'earliest'
 }
+BUCKET_NAME = "picture-bucket"
+MINIO_ENDPOINT = getenv("MINIO_ENDPOINT")
+
+s3 = boto3.client(
+    's3',
+    endpoint_url='http://minio:9000',
+    aws_access_key_id='minioadmin',
+    aws_secret_access_key='minioadmin',
+    region_name='us-east-1'
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -53,6 +63,12 @@ def start_kafka_consumer():
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, consume_kafka)
 
+def send_to_s3(buffer):
+    s3_key = f"avatars/{uuid.uuid4().hex}.jpg"
+    s3.upload_fileobj(buffer, BUCKET_NAME, s3_key, ExtraArgs={'ContentType': 'image/jpeg'})
+    return f"http://{MINIO_ENDPOINT}/{s3_key}"
+    
+
 @app.post("/add_in_queue")
 async def send_to_queue(item: Item):
 
@@ -67,6 +83,11 @@ async def send_to_queue(item: Item):
             # добавить добавление канала в БД и в редис и возврат uuid для дальнейшей обработки
             with psycopg2.connect(**dsn) as conn:
                 with conn.cursor() as cur:
+
+                    buffer = io.BytesIO()
+                    await client.download_profile_photo(channel, file=buffer)
+                    buffer.seek(0)
+
                     cur.execute("""INSERT INTO channels_status (
                                     telegram_link, channel_name, picture_link, processing_status
                                     ) 
@@ -75,7 +96,7 @@ async def send_to_queue(item: Item):
                     channel_username,
                     channel.title,
                     # добавить отправку на S3
-                    'https://example.com/image.jpg',
+                    send_to_s3(buffer),
                     False
                     ))
                     channel_uuid = cur.fetchone()[0]
