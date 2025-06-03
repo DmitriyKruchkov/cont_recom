@@ -150,6 +150,8 @@ async def send_to_queue(item: Item):
                                     False
                                     ))
                         post_id = cur.fetchone()[0]
+                        print("_______DEBUG_______")
+                        print(counter, "and", len(history.messages), " is ", counter == len(history.messages) - 1)
                         data = {
                             "channel_uuid": channel_uuid,
                             "post_id": post_id,
@@ -162,6 +164,7 @@ async def send_to_queue(item: Item):
                             value=json.dumps(data),
                             callback=delivery_report
                         )
+                        print("_______END_______")
                         counter += 1
                     conn.commit()
                     producer.flush()
@@ -169,6 +172,7 @@ async def send_to_queue(item: Item):
                     return {"channel_uuid": channel_uuid}
         else:
             raise HTTPException(status_code=404, detail="Channel not found")
+
 def is_valid_uuid(value: str) -> bool:
     try:
         uuid.UUID(value)
