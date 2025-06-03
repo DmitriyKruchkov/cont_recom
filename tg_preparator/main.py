@@ -131,14 +131,12 @@ async def send_to_queue(item: Item):
                     print(f"messages:", history)
                     # добавить добавление поста в бд и колво реакций на посте
                     # добавить отправку постов на обработку llm для топиков и реализовать через kafka
-                   # history.messages = [i for i in history.messages if not i.reactions]
+                    history.messages = [i for i in history.messages if not i.reactions]
                     print("starting for")
                     counter = 0
                     for message in history.messages:
                         
                         emoji_counter = 0
-                        if not message.reactions:
-                            continue
                         for elem in message.reactions.results:
                             if isinstance(elem.reaction, ReactionEmoji) and elem.reaction.emoticon in emoji_translate.keys():
                                 emoji_counter += emoji_translate[elem.reaction.emoticon] * elem.count
@@ -171,8 +169,6 @@ async def send_to_queue(item: Item):
                         print("_______END_______")
                         counter += 1
                     conn.commit()
-                    producer.flush()
-
                     return {"channel_uuid": channel_uuid}
         else:
             raise HTTPException(status_code=404, detail="Channel not found")
