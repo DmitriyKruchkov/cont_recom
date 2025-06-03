@@ -117,6 +117,7 @@ async def send_to_queue(item: Item):
                     False
                     ))
                     channel_uuid = cur.fetchone()[0]
+                    print("getting...")
                     history = await client(GetHistoryRequest(
                         peer=channel,
                         limit=POSTS_COUNT,
@@ -131,6 +132,7 @@ async def send_to_queue(item: Item):
                     # добавить добавление поста в бд и колво реакций на посте
                     # добавить отправку постов на обработку llm для топиков и реализовать через kafka
                    # history.messages = [i for i in history.messages if not i.reactions]
+                    print("starting for")
                     counter = 0
                     for message in history.messages:
                         
