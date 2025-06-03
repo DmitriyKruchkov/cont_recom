@@ -131,10 +131,12 @@ async def send_to_queue(item: Item):
                     print(f"messages:", history)
                     # добавить добавление поста в бд и колво реакций на посте
                     # добавить отправку постов на обработку llm для топиков и реализовать через kafka
-                    history.messages = [i for i in history.messages if not i.reactions]
+                    history_messages = [i for i in history.messages if not i.reactions]
+
+                    
                     print("starting for")
                     counter = 0
-                    for message in history.messages:
+                    for message in history_messages:
                         
                         emoji_counter = 0
                         for elem in message.reactions.results:
@@ -153,13 +155,13 @@ async def send_to_queue(item: Item):
                                     ))
                         post_id = cur.fetchone()[0]
                         print("_______DEBUG_______")
-                        print(counter, "and", len(history.messages), " is ", counter == len(history.messages) - 1)
+                        print(counter, "and", len(history_messages), " is ", counter == len(history_messages) - 1)
                         data = {
                             "channel_uuid": channel_uuid,
                             "post_id": post_id,
                             "text": message.message,
                             "emoji": emoji_counter,
-                            "is_last": counter == len(history.messages) - 1
+                            "is_last": counter == len(history_messages) - 1
                             }
                         producer.produce(
                             topic="ml_requests",
