@@ -131,7 +131,7 @@ async def send_to_queue(item: Item):
                     print(f"messages:", history)
                     # добавить добавление поста в бд и колво реакций на посте
                     # добавить отправку постов на обработку llm для топиков и реализовать через kafka
-                    history_messages = [i for i in history.messages if i.reactions]
+                    history_messages = [i for i in history.messages if i.reactions and i.message]
 
                     print("prepared list", history_messages)
                     print("starting for")
