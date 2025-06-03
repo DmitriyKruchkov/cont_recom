@@ -128,7 +128,7 @@ async def send_to_queue(item: Item):
                         add_offset=0,
                         hash=0
                     ))
-                    logger.info(history.messages)
+                    print(f"messages:", history)
                     # добавить добавление поста в бд и колво реакций на посте
                     # добавить отправку постов на обработку llm для топиков и реализовать через kafka
                    # history.messages = [i for i in history.messages if not i.reactions]
