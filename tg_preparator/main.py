@@ -133,7 +133,7 @@ async def send_to_queue(item: Item):
                     # добавить отправку постов на обработку llm для топиков и реализовать через kafka
                     history_messages = [i for i in history.messages if not i.reactions]
 
-                    
+                    print("prepared list", history_messages)
                     print("starting for")
                     counter = 0
                     for message in history_messages:
