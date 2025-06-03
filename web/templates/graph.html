@@ -23,7 +23,7 @@
         <h3>Favourite topics:</h3>
         <ol>
             {% for bar in chart_data %}       
-                <li>{{ bar.label }} - {{ bar.value }}</li>
+                <li>{{ bar.label }}: {{ bar.value }}</li>
             {% endfor %}
         </ol>
     </div>
