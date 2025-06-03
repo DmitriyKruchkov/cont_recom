@@ -71,28 +71,21 @@ services:
     networks:
       - backend
   postgres:
-    image: postgres:16  # Официальный образ PostgreSQL
-    container_name: postgres  # Имя контейнера
+    image: postgres:16
+    container_name: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "16432:5432"  # Пробрасываем порт 5432 на хост
+      - "16432:5432"
     volumes:
       - ballon-postgres_data:/var/lib/postgresql/data
       - ./sql_scripts/createdb.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: always  # Автоматический перезапуск при сбоях
+    restart: always
     networks:
       - backend
-  redis:
-    image: redis:7.4.2  # Официальный образ Redis
-    container_name: redis  # Имя контейнера
-    volumes:
-      - ballon-redis_data:/data  # Том для данных Redis
-    restart: always  # Автоматический перезапуск при сбоях
-    networks:
-      - backend
+
   
   minio:
     image: minio/minio
