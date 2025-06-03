@@ -137,7 +137,8 @@ async def send_to_queue(item: Item):
                     print("starting for")
                     counter = 0
                     for message in history_messages:
-                        
+                        print("_____________________message_______________")
+                        print(message)
                         emoji_counter = 0
                         for elem in message.reactions.results:
                             if isinstance(elem.reaction, ReactionEmoji) and elem.reaction.emoticon in emoji_translate.keys():
