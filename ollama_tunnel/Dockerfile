@@ -9,10 +9,6 @@ RUN apt-get update && \
 
 COPY sshd_config /etc/ssh/sshd_config
 
-# Если есть старые ключи — используем их
-RUN test -f /data/ssh/ssh_host_rsa_key || ssh-keygen -A
-
-VOLUME /data/ssh
 EXPOSE 22
 
 CMD ["/usr/sbin/sshd", "-D"]

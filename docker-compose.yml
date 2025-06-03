@@ -8,8 +8,6 @@ services:
     container_name: tunnel-ssh
     ports:
       - "2222:22"
-    volumes:
-      - ssh-data:/data/ssh  # том для ключей и конфигов
     networks:
       - backend
     restart: unless-stopped
