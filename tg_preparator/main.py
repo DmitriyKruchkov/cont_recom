@@ -117,7 +117,7 @@ async def send_to_queue(item: Item):
                     False
                     ))
                     channel_uuid = cur.fetchone()[0]
-                    print("getting...")
+                    logger.info("getting...")
                     history = await client(GetHistoryRequest(
                         peer=channel,
                         limit=POSTS_COUNT,
@@ -128,17 +128,17 @@ async def send_to_queue(item: Item):
                         add_offset=0,
                         hash=0
                     ))
-                    print(f"messages:", history)
+                    logger.info(f"messages:", history)
                     # добавить добавление поста в бд и колво реакций на посте
                     # добавить отправку постов на обработку llm для топиков и реализовать через kafka
                     history_messages = [i for i in history.messages if i.reactions and i.message]
 
-                    print("prepared list", history_messages)
-                    print("starting for")
+                    logger.info("prepared list", history_messages)
+                    logger.info("starting for")
                     counter = 0
                     for message in history_messages:
-                        print("_____________________message_______________")
-                        print(message)
+                        logger.info("_____________________message_______________")
+                        logger.info(message)
                         emoji_counter = 0
                         for elem in message.reactions.results:
                             if isinstance(elem.reaction, ReactionEmoji) and elem.reaction.emoticon in emoji_translate.keys():
@@ -155,8 +155,8 @@ async def send_to_queue(item: Item):
                                     False
                                     ))
                         post_id = cur.fetchone()[0]
-                        print("_______DEBUG_______")
-                        print(counter, "and", len(history_messages), " is ", counter == len(history_messages) - 1)
+                        logger.info("_______DEBUG_______")
+                        logger.info(counter, "and", len(history_messages), " is ", counter == len(history_messages) - 1)
                         data = {
                             "channel_uuid": channel_uuid,
                             "post_id": post_id,
@@ -169,7 +169,7 @@ async def send_to_queue(item: Item):
                             value=json.dumps(data),
                             callback=delivery_report
                         )
-                        print("_______END_______")
+                        logger.info("_______END_______")
                         counter += 1
                     conn.commit()
                     return {"channel_uuid": channel_uuid}
